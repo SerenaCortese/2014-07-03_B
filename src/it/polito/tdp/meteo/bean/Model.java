@@ -46,7 +46,7 @@ public class Model {
 
 	private void ricorsione(List<Citta> parziale, int giorniTotali) {
 		
-		if(parziale.size() == 3+1) {
+		if(parziale.size() == giorniTotali+1) {
 			int costo = calcolaCosto(parziale,giorniTotali);
 			if(costo < costoMin) {
 				costoMin = costo;
@@ -78,7 +78,7 @@ public class Model {
 		int costo = 0 ;
 		
 		Citta cittaIeri = null ;
-		for(int giorno = 1; giorno<=3; giorno++) {
+		for(int giorno = 1; giorno<=giorniTotali; giorno++) {
 			Citta cittaOggi = parziale.get(giorno) ;
 
 			if( cittaIeri!=null && !cittaOggi.equals(cittaIeri)) {
