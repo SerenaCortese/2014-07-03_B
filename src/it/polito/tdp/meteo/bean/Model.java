@@ -1,5 +1,6 @@
 package it.polito.tdp.meteo.bean;
 
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class Model {
 	
 	private List<Citta> cittaOttime;
 	private int costoMin;
+	private Month m;
 	
 	public Model() {
 		dao = new MeteoDAO();	
@@ -32,7 +34,7 @@ public class Model {
 		for(Citta c : citta) {
 			c.setRilevamenti(dao.getAllRilevamentiLocalitaMese(mese,c));
 		}
-		Month m = Month.of(Integer.valueOf(mese));
+		m = Month.of(Integer.valueOf(mese));
 		int giorniTotali = m.length(false);
 		cittaOttime = null;
 		List<Citta> parziale = new ArrayList<Citta>();
@@ -44,8 +46,8 @@ public class Model {
 
 	private void ricorsione(List<Citta> parziale, int giorniTotali) {
 		
-		if(parziale.size() == giorniTotali) {
-			int costo = calcolaCosto(parziale);
+		if(parziale.size() == 3+1) {
+			int costo = calcolaCosto(parziale,giorniTotali);
 			if(costo < costoMin) {
 				costoMin = costo;
 				cittaOttime = new ArrayList<>(parziale);
@@ -67,28 +69,39 @@ public class Model {
 		
 	}
 
-	private int calcolaCosto(List<Citta> parziale) {
+	private int calcolaCosto(List<Citta> parziale, int giorniTotali) {
 		// costo + c *spostamenti + k*umidità del giorno
 		
 		if(parziale == null || parziale.size()<=1)
 			return Integer.MAX_VALUE;
 		
-		Citta previous = parziale.get(0);
-		int score = 0;
+		int costo = 0 ;
 		
-		for (Citta c : parziale) {
-			if (!previous.equals(c)) {//se si sposta
-				score += Model.C;
+		Citta cittaIeri = null ;
+		for(int giorno = 1; giorno<=3; giorno++) {
+			Citta cittaOggi = parziale.get(giorno) ;
+
+			if( cittaIeri!=null && !cittaOggi.equals(cittaIeri)) {
+				costo += C ;
 			}
-			previous = c;
-			for(Rilevamento r : c.getRilevamenti()) {
-				if( r.getUmidita() != null)
-					score += K * r.getUmidita() ;
-				else
-					score += K * 100 ; //caso peggiore 100% di umidità	
+			cittaIeri = cittaOggi ;
+			
+			LocalDate oggi = LocalDate.of(2013, this.m, giorno) ;
+			// trovare umitida nella 'cittaOggi' nel giorno 'oggi'
+			Integer um = null;
+			for(Rilevamento r : cittaOggi.getRilevamenti()) {
+				if(r.getData().equals(oggi)) {
+					um = r.getUmidita();
+				}
 			}
+			if(um != null)
+				costo += K * um ;
+			else
+				costo += K * 100 ;
+				// se manca il dato, ipotizzo il caso peggiore
 		}
-		return score;
+		
+		return costo;
 		
 	}
 
