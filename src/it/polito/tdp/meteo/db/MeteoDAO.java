@@ -12,6 +12,8 @@
 
 package it.polito.tdp.meteo.db;
 
+import it.polito.tdp.meteo.bean.Citta;
+import it.polito.tdp.meteo.bean.Rilevamento;
 import it.polito.tdp.meteo.bean.Situazione;
 
 import java.sql.Connection;
@@ -60,6 +62,7 @@ public class MeteoDAO {
 						rs.getInt("Pioggia"), rs.getString("Fenomeni"));
 				situazioni.add(s);
 			}
+			conn.close();
 			return situazioni;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -67,22 +70,80 @@ public class MeteoDAO {
 		}
 	}
 
-	/**
-	 * Test method for class {@link MeteoDAO}
-	 * 
-	 * @param args
-	 */
-	public static void main(String args[]) {
+//	/**
+//	 * Test method for class {@link MeteoDAO}
+//	 * 
+//	 * @param args
+//	 */
+//	public static void main(String args[]) {
+//		
+//		MeteoDAO dao = new MeteoDAO() ;
+//		
+//		List<Situazione> list = dao.getAllSituazioni() ;
+//		
+//		for( Situazione s : list ) {
+//			System.out.format("%-10s %2td/%2$2tm/%2$4tY %3d°C-%3d°C  %3d%%  %s\n", 
+//					s.getLocalita(), s.getData(), s.getTMin(), s.getTMax(), s.getUmidita(), s.getFenomeni()) ;
+//		}
+//
+//	}
+
+	public List<Citta> getUmiditaMediaPerMese(Integer mese) {
+		String sql = "SELECT localita, avg(umidita) " + 
+				"FROM situazione " + 
+				"WHERE MONTH(data) = ? " + 
+				"GROUP BY localita ";
 		
-		MeteoDAO dao = new MeteoDAO() ;
+		List<Citta> cittaUmiditaMese = new ArrayList<>();
+
+		try {
+			Connection conn = DBConnect.getInstance().getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, Integer.valueOf(mese));
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				Citta c = new Citta(rs.getString("localita"),rs.getDouble("avg(umidita)"));
+				cittaUmiditaMese.add(c);
+				
+			}
+			conn.close();
+			return cittaUmiditaMese;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 		
-		List<Situazione> list = dao.getAllSituazioni() ;
+	}
+
+	public List<Rilevamento> getAllRilevamentiLocalitaMese(Integer mese, Citta c) {
+		String sql = "SELECT data, umidita " + 
+				"FROM situazione " + 
+				"WHERE MONTH(data) = ? " + 
+				"AND localita = ? ";
 		
-		for( Situazione s : list ) {
-			System.out.format("%-10s %2td/%2$2tm/%2$4tY %3d°C-%3d°C  %3d%%  %s\n", 
-					s.getLocalita(), s.getData(), s.getTMin(), s.getTMax(), s.getUmidita(), s.getFenomeni()) ;
+		List<Rilevamento> rilevamentiUmiditaMese = new ArrayList<>();
+
+		try {
+			Connection conn = DBConnect.getInstance().getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, Integer.valueOf(mese));
+			st.setString(2, c.getCitta());
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				
+				rilevamentiUmiditaMese.add(new Rilevamento(c, rs.getDate("data").toLocalDate(), rs.getInt("umidita")));
+				
+			}
+			conn.close();
+			return rilevamentiUmiditaMese;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
 
+	
 }

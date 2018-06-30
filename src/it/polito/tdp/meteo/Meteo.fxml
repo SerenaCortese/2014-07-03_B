@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polito.tdp.meteo.MeteoController">
+<BorderPane xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polito.tdp.meteo.MeteoController">
   <!-- TODO Add Nodes -->
   <center>
     <VBox prefHeight="-1.0" prefWidth="-1.0" spacing="5.0">
@@ -21,13 +21,13 @@
             <ChoiceBox fx:id="boxMese">
 
             </ChoiceBox>
-            <Button id="btnCerca" fx:id="btnUmidita" mnemonicParsing="false" text="Umidità" />
+            <Button id="btnCerca" fx:id="btnUmidita" mnemonicParsing="false" onAction="#getUmiditaMedie" text="Umidità" />
           </children>
         </HBox>
         <HBox alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" spacing="10.0">
           <children>
             <Label text="Sequenza ottimale delle città" />
-            <Button fx:id="btnCalcola" mnemonicParsing="false" text="Calcola" />
+            <Button fx:id="btnCalcola" mnemonicParsing="false" onAction="#doCalcolaSequenza" text="Calcola" />
           </children>
         </HBox>
         <TextArea fx:id="txtResult" disable="false" editable="false" prefWidth="-1.0" wrapText="true" />
